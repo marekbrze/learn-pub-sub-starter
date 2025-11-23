@@ -26,11 +26,10 @@ func main() {
 		log.Fatal("Couldn't connect")
 	}
 	queueNameKey := routing.PauseKey + "." + name
-	_, queue, err := pubsub.DeclareAndBind(connection, routing.ExchangePerilDirect, queueNameKey, routing.PauseKey, pubsub.SimpleQueueTransient)
+	_, _, err = pubsub.DeclareAndBind(connection, routing.ExchangePerilDirect, queueNameKey, routing.PauseKey, pubsub.SimpleQueueTransient)
 	if err != nil {
 		log.Fatal("Couldn't connect")
 	}
-	fmt.Println(queue.Name)
 	// Closing sequence
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
