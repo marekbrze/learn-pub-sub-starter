@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
-	"os/signal"
 
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
@@ -30,11 +28,43 @@ func main() {
 	if err != nil {
 		log.Fatal("Couldn't connect")
 	}
-	// Closing sequence
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt)
-	<-signalChan
+	gameState := gamelogic.NewGameState(name)
+	for {
+		input := gamelogic.GetInput()
 
-	fmt.Println("Connection closing")
-	connection.Close()
+		if len(input) == 0 {
+			continue
+		}
+		fmt.Println(gameState.GetUsername())
+		firstWord := input[0]
+		switch firstWord {
+		case "spawn":
+			err := gameState.CommandSpawn(input)
+			if err != nil {
+				fmt.Printf("couldn't process spawn command: %v\n", err)
+				continue
+			}
+		case "move":
+			moved, err := gameState.CommandMove(input)
+			if err != nil {
+				fmt.Printf("couldn't process move command: %v\n", err)
+				continue
+			}
+			fmt.Println(moved)
+		case "status":
+			gameState.CommandStatus()
+			continue
+		case "help":
+			gamelogic.PrintClientHelp()
+			continue
+		case "spam":
+			fmt.Println("Spamming not allowed yet!")
+			continue
+		case "quit":
+			gamelogic.PrintQuit()
+			return
+		default:
+			fmt.Println("I don't understand. Please enter command again")
+		}
+	}
 }
