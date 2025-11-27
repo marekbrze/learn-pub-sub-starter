@@ -33,6 +33,11 @@ func main() {
 		log.Fatal("Error when creating channel")
 	}
 
+	_, _, err = pubsub.DeclareAndBind(connection, routing.ExchangePerilTopic, routing.GameLogSlug, routing.GameLogSlug+".*", pubsub.SimpleQueueDurable)
+	if err != nil {
+		log.Fatal("Couldn't connect")
+	}
+
 	gamelogic.PrintServerHelp()
 	for {
 		input := gamelogic.GetInput()
