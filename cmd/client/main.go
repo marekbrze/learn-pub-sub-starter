@@ -23,12 +23,18 @@ func main() {
 	if err != nil {
 		log.Fatal("Couldn't connect")
 	}
-	queueNameKey := routing.PauseKey + "." + name
-	_, _, err = pubsub.DeclareAndBind(connection, routing.ExchangePerilDirect, queueNameKey, routing.PauseKey, pubsub.SimpleQueueTransient)
-	if err != nil {
-		log.Fatal("Couldn't connect")
-	}
 	gameState := gamelogic.NewGameState(name)
+	err = pubsub.SubscribeJSON(
+		connection,
+		routing.ExchangePerilDirect,
+		routing.PauseKey+"."+gameState.GetUsername(),
+		routing.PauseKey,
+		pubsub.SimpleQueueTransient,
+		handlerPause(gameState),
+	)
+	if err != nil {
+		log.Fatalf("could not subscribe to pause: %v", err)
+	}
 	for {
 		input := gamelogic.GetInput()
 
