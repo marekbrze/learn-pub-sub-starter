@@ -23,6 +23,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Couldn't connect")
 	}
+
 	gameState := gamelogic.NewGameState(name)
 	err = pubsub.SubscribeJSON(
 		connection,
@@ -35,6 +36,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not subscribe to pause: %v", err)
 	}
+
+	queueNameForUser := "army_moves." + name
+	_, _, err = pubsub.DeclareAndBind(connection, routing.ExchangePerilTopic, queueNameForUser, "army_moves.*", pubsub.SimpleQueueTransient)
+	if err != nil {
+		log.Fatalf("coulnd't create queue for publishing moves: %v", err)
+	}
+
 	for {
 		input := gamelogic.GetInput()
 
