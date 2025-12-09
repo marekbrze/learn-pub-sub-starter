@@ -86,7 +86,6 @@ func main() {
 				log.Fatal("Error when publishing to the channel")
 			}
 
-			fmt.Printf("Moved %v units to %s\n", len(moved.Units), moved.ToLocation)
 		case "status":
 			gameState.CommandStatus()
 			continue
