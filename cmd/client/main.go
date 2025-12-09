@@ -24,6 +24,11 @@ func main() {
 		log.Fatal("Couldn't connect")
 	}
 
+	publishCh, err := connection.Channel()
+	if err != nil {
+		log.Fatalf("could not create channel: %v", err)
+	}
+
 	gameState := gamelogic.NewGameState(name)
 	err = pubsub.SubscribeJSON(
 		connection,
@@ -43,6 +48,17 @@ func main() {
 		log.Fatalf("coulnd't create queue for publishing moves: %v", err)
 	}
 
+	err = pubsub.SubscribeJSON(
+		connection,
+		routing.ExchangePerilTopic,
+		routing.ArmyMovesPrefix+"."+gameState.GetUsername(),
+		routing.ArmyMovesPrefix+".*",
+		pubsub.SimpleQueueTransient,
+		handlerMessage(gameState),
+	)
+	if err != nil {
+		log.Fatalf("could not subscribe to army moves: %v", err)
+	}
 	for {
 		input := gamelogic.GetInput()
 
@@ -64,7 +80,13 @@ func main() {
 				fmt.Printf("couldn't process move command: %v\n", err)
 				continue
 			}
-			fmt.Println(moved)
+
+			err = pubsub.PublishJSON(publishCh, string(routing.ExchangePerilTopic), queueNameForUser, moved)
+			if err != nil {
+				log.Fatal("Error when publishing to the channel")
+			}
+
+			fmt.Printf("Moved %v units to %s\n", len(moved.Units), moved.ToLocation)
 		case "status":
 			gameState.CommandStatus()
 			continue
