@@ -35,7 +35,7 @@ func main() {
 
 	_, _, err = pubsub.DeclareAndBind(connection, routing.ExchangePerilTopic, routing.GameLogSlug, routing.GameLogSlug+".*", pubsub.SimpleQueueDurable)
 	if err != nil {
-		log.Fatal("Couldn't connect")
+		log.Fatal("Couldn't connect", err)
 	}
 
 	gamelogic.PrintServerHelp()

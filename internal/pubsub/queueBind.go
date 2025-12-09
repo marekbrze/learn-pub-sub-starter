@@ -22,7 +22,10 @@ func DeclareAndBind(
 	if err != nil {
 		return nil, amqp.Queue{}, err
 	}
-	queue, err := channel.QueueDeclare(queueName, queueType == SimpleQueueDurable, queueType != SimpleQueueDurable, queueType != SimpleQueueDurable, false, nil)
+	tableArgs := amqp.Table{
+		"x-dead-letter-exchange": "peril_dlx",
+	}
+	queue, err := channel.QueueDeclare(queueName, queueType == SimpleQueueDurable, queueType != SimpleQueueDurable, queueType != SimpleQueueDurable, false, tableArgs)
 	if err != nil {
 		return nil, amqp.Queue{}, err
 	}
