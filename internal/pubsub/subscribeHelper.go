@@ -44,15 +44,12 @@ func Subscribe[T any](
 			switch actype {
 			case Ack:
 				msg.Ack(false)
-				fmt.Println("Ack")
 				fmt.Printf(">")
 			case NackDiscard:
 				msg.Nack(false, false)
-				fmt.Println("Nack Discard")
 				fmt.Printf(">")
 			case NackRequeue:
 				msg.Nack(false, true)
-				fmt.Println("Nack Requeue")
 				fmt.Printf(">")
 			}
 		}

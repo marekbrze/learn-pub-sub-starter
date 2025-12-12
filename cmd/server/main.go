@@ -33,9 +33,21 @@ func main() {
 		log.Fatal("Error when creating channel")
 	}
 
-	_, _, err = pubsub.DeclareAndBind(connection, routing.ExchangePerilTopic, routing.GameLogSlug, routing.GameLogSlug+".*", pubsub.SimpleQueueDurable)
+	logChannel, _, err := pubsub.DeclareAndBind(connection, routing.ExchangePerilTopic, routing.GameLogSlug, routing.GameLogSlug+".*", pubsub.SimpleQueueDurable)
 	if err != nil {
-		log.Fatal("Couldn't connect", err)
+		log.Fatal("Couldn't declare and bind GameLog queue", err)
+	}
+
+	err = pubsub.SubscribeGob(
+		connection,
+		routing.ExchangePerilTopic,
+		string(routing.GameLogSlug),
+		routing.GameLogSlug+".*",
+		pubsub.SimpleQueueDurable,
+		handleGameLog(logChannel),
+	)
+	if err != nil {
+		log.Fatalf("could not subscribe to log queue: %v", err)
 	}
 
 	gamelogic.PrintServerHelp()
